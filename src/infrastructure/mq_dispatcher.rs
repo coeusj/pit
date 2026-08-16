@@ -98,6 +98,8 @@ impl Dispatcher
                     }
                 }
             }
+
+            println!("Dispatcher: receiver closed, exiting worker");
         });
 
         self.woker_handle = Some(handle);

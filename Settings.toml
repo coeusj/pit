@@ -2,6 +2,7 @@
 receiver_address = "127.0.0.1:8080"
 sender_address = "127.0.0.1:0"
 socket_read_timeout_seconds = 10
+buffer_size = 22
 
 [mq_conf]
 address = "amqp://admin:securepassword@127.0.0.1:5672"

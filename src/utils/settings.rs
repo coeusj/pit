@@ -6,7 +6,8 @@ use anyhow::Result;
 pub struct UdpConfiguration {
     pub receiver_address: String,
     pub sender_address: String,
-    pub socket_read_timeout_seconds: u64
+    pub socket_read_timeout_seconds: u64,
+    pub buffer_size: usize
 }
 
 #[derive(Deserialize)]

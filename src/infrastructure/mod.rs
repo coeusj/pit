@@ -1,2 +1,2 @@
-pub mod receiver;
-pub mod dispatcher;
+pub mod udp_receiver;
+pub mod mq_dispatcher;
