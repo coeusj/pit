@@ -1,0 +1,22 @@
+[package]
+name = "pit"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.104"
+arc = "0.0.1"
+config = "0.15.25"
+crossbeam-channel = "0.5.16"
+lapin = {version = "4.10.0", features = ["tokio"]}
+rand = "0.10.2"
+serde = {version = "1.0.229", features = ["derive"]}
+tokio = {version = "1.53.1", features = ["full"]}
+
+[[bin]]
+name = "pit"
+path = "src/bin/pit.rs"
+
+[[bin]]
+name = "car"
+path = "src/bin/car.rs"
