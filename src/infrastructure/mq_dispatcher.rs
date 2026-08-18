@@ -1,8 +1,7 @@
 use anyhow::Result;
-use lapin::{
-    BasicProperties, Channel, Confirmation, Queue, options::{BasicPublishOptions, QueueDeclareOptions}, types::{FieldTable, ShortString},
-};
+use lapin::{BasicProperties, Channel, Confirmation, Queue, options::{BasicPublishOptions, QueueDeclareOptions}, types::{FieldTable, ShortString}};
 use tokio::task::JoinHandle;
+use tokio_util::sync::CancellationToken;
 
 pub struct Dispatcher {
     receiver: Option<tokio::sync::mpsc::Receiver<Vec<u8>>>,
@@ -13,8 +12,7 @@ pub struct Dispatcher {
     woker_handle: Option<JoinHandle<()>>
 }
 
-impl Dispatcher
-{
+impl Dispatcher {
     pub fn new(
         receiver: Option<tokio::sync::mpsc::Receiver<Vec<u8>>>,
         amqp_channel: Channel,
@@ -45,7 +43,7 @@ impl Dispatcher
             .await?)
     }
 
-    pub async fn consume(&mut self) -> Result<()> {
+    pub async fn consume(&mut self, cancellation_token: CancellationToken) -> Result<()> {
         if self.is_consuming {
             println!("Dispatcher already consuming");
             return Ok(());
@@ -63,9 +61,28 @@ impl Dispatcher
         let routing_key = self.routing_key.clone();
 
         let handle = tokio::spawn(async move {
-            while let Some(payload) = receiver.recv().await {
-                let publish_opts = BasicPublishOptions::default();
+            println!("Dispatcher started");
+
+            let publish_opts = BasicPublishOptions::default();
+
+            loop {
                 let props = BasicProperties::default().with_delivery_mode(2);
+
+                let payload = tokio::select! {
+                    _ = cancellation_token.cancelled() => {
+                        println!("Dispatcher: received cancellation signal.");
+                        break;
+                    }
+                    maybe_payload = receiver.recv() => {
+                        match maybe_payload {
+                            Some(p) => p,
+                            None => {
+                                println!("Dispatcher: receiver channel closed");
+                                break;
+                            }
+                        }
+                    }
+                };
 
                 let confirmation = match channel
                     .basic_publish(
@@ -91,10 +108,10 @@ impl Dispatcher
                         eprintln!("❌ Message NACKed by RabbitMQ.");
                     }
                     Ok(Confirmation::NotRequested) => {
-                        println!("Message published (confirmations disabled).");
+                        println!("✅ Message published (confirmations disabled).");
                     }
                     Err(err) => {
-                        eprintln!("Broker confirmation error: {err}");
+                        eprintln!("‼️ Broker confirmation error: {err}");
                     }
                 }
             }

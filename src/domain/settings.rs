@@ -18,13 +18,20 @@ pub struct MQConfiguration {
 }
 
 #[derive(Deserialize)]
+pub struct SensorConfiguration {
+    pub id: u16,
+    pub frequency_hz: u64
+}
+
+#[derive(Deserialize)]
 pub struct Settings {
     pub udp_conf: UdpConfiguration,
-    pub mq_conf: MQConfiguration
+    pub mq_conf: MQConfiguration,
+    pub sensors: Vec<SensorConfiguration>
 }
 
 impl Settings {
-    pub fn new() -> Result<Self> {
+    pub fn load() -> Result<Self> {
         let config = Config::builder()
             .add_source(File::with_name("Settings"))
             .build()?;

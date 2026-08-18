@@ -1,7 +1,6 @@
 use std::time::{SystemTime, UNIX_EPOCH};
 
 pub mod buffer;
-pub mod settings;
 
 pub fn now_seconds() -> u64 {
     let duration_since_epoch = SystemTime::now()

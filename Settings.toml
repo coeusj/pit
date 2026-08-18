@@ -8,3 +8,11 @@ buffer_size = 22
 address = "amqp://admin:securepassword@127.0.0.1:5672"
 user = "admin"
 password = "securepassword"
+
+[[sensors]]
+id = 1
+frequency_hz = 1
+
+[[sensors]]
+id = 2
+frequency_hz = 5
